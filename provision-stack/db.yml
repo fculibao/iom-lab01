@@ -3,25 +3,34 @@
   hosts: dbsrvgrp
   gather_facts: no
   tasks:
+    - name: Setup Local hostname
+      shell: |
+        hostname {{hostname}}
+        echo {{hostname}} > /etc/hostname
+ 
+    - name: Setup DB Password
+      shell: |
+        echo "DATABASE_PASS='admin123'" >> ~/.bash_profile
+        source ~/.bash_profile
+
+    - name: Update the host
+      shell: |
+        sudo yum update -y
+        sudo yum install epel-release -y
+
     - name: Installing Mysql Service and dependencies
-      package:
-        name: "{{item}}"
+      ansible.builtin.yum:
+        name: 
+          - git
+          - zip
+          - unzip
+          - mariadb-server
+          - MySQL-python # dependencies for createing a user in the database
         state: present
-        update_cache: yes
-        cache_valid_time: 86400
-      with_items:
-        - mysql-server
-        - mysql-client
-        - python-mysqldb
-        - python3-mysqldb
-        - libmysqlclient-dev
-      ignore_errors: yes
-      tags:
-        - package
 
     - name: Start and enable mysql service
       service:
-        name: mysql
+        name: mariadb
         state: started
         enabled: yes
       tags:
@@ -35,25 +44,39 @@
         host: '%'
         state: present
 
-
     - name: Creating accounts DB
       mysql_db:
         name: "{{dbname}}"
         state: present
 
-    - name: Enable remote login to mysql svc
-      lineinfile:
-        path: /etc/mysql/mysql.conf.d/mysqld.cnf
-        regexp: '^bind-address'
-        line: 'bind-address = 0.0.0.0'
-        backup: yes
-      notify:
-        - Restart mysql
-      tags:
-        - conf
+    - name: Edit my.cnf to allow root at localhost
+      shell: |
+        sudo echo "skip-grant-table" >> /etc/my.cnf.d/server.cnf
+        sudo systemctl restart mariadb
+
+    - name: Restore the dump file from the application
+      shell: |
+        cd /tmp/
+        git clone -b local-setup https://github.com/devopshydclub/vprofile-project.git
+        mysqladmin -u root password "$DATABASE_PASS"
+        sudo systemctl restart mariadb
+        sleep 15;
+        mysql -u root -p"DATABASE_PASS" -e "UPDATE mysql.user SET Password=PASSWORD('$DATABASE_PASS') WHERE User='root'"
+        mysql -u root -p"DATABASE_PASS" -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1')"
+        mysql -u root -p"DATABASE_PASS" -e "DELETE FROM mysql.user WHERE User=''"
+        mysql -u root -p"DATABASE_PASS" -e "DELETE FROM mysql.db WHERE Db='test' OR Db='test\_%'"
+        mysql -u root -p"DATABASE_PASS" -e "FLUSH PRIVILEGES"
+        mysql -u root -p"DATABASE_PASS" -e "grant all privileges on accounts.* TO 'admin'@'localhost' identified by 'admin123'"
+        mysql -u root -p"DATABASE_PASS" -e "grant all privileges on accounts.* TO 'admin'@'%' identified by 'admin123'"
+        sudo systemctl restart mariadb
+        sleep 15;
+        mysql -u root -p"DATABASE_PASS" accounts < /tmp/vprofile-project/src/main/resources/db_backup.sql
+        mysql -u root -p"DATABASE_PASS" -e "FLUSH PRIVILEGES"
+        sudo systemctl restart mariadb
+        sleep 15;
 
   handlers:
     - name: Restart mysql
       service:
-        name: mysql
+        name: mariadb
         state: restarted
