@@ -1,0 +1,7 @@
+---
+- name: Set host static IP address
+  hosts: rmqsrvgrp
+  gather_facts: no
+  tasks:
+    - name: Edit NETPLAN 
+        
