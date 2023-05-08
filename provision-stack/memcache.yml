@@ -3,6 +3,10 @@
   hosts: mcsrvgrp
   gather_facts: no
   tasks:
+    - name: Setup Local hostname
+      ansible.builtin.hostname:
+        name: "{{hostname}}"
+
     - name: Install Memcache
       apt:
         name: memcached

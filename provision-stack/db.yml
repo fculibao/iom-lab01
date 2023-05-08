@@ -22,6 +22,7 @@
     - name: Start and enable mysql service
       service:
         name: mysql
+        
     - name: Setup Local hostname
       ansible.builtin.hostname:
         name: "{{hostname}}"
