@@ -1,1 +1,2 @@
 hostname: rmq01
+netplan: netplan-urabbitmq01
