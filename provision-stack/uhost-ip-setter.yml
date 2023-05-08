@@ -1,7 +1,59 @@
 ---
 - name: Set host static IP address
-  hosts: rmqsrvgrp
+  vars_prompt: 
+    - name: server
+      prompt: "Enter hostname: "
+      private: no
+
+  hosts: "{{ server }}"
   gather_facts: no
+
   tasks:
+    - name: USER U1 - Generate an OpenSSH keypair with the default values (4096 bits, rsa)
+      openssh_keypair:
+        path: /home/ferdie/.ssh/id_rsa
+        owner: ferdie
+        group: ferdie
+
+    - name: Fix owner of the generated pub key
+      file:
+        path: /home/ferdie/.ssh/id_rsa.pub
+        owner: ferdie
+        group: ferdie
+
+#    - name: USER ROOT - Generate an OpenSSH keypair with the default values (4096 bits, rsa)
+#      openssh_keypair:
+#        path: /root/.ssh/id_rsa
+#        owner: root
+#        group: root#
+
+#    - name: Fix owner of the generated pub key
+#      file:
+#        path: /root/.ssh/id_rsa.pub
+#        owner: root
+#        group: root
+
+#    - name: Allow Root Login
+#      command: sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+#    - name: Update Root user's Password
+#      user:
+#        name: root
+#        update_password: always
+#        password: $6$rounds=656000$6TbCg2Ax.JU2NczQ$dq6DKHT9iFklcZlrNdxd2jJZ.8APchvWUO1ogm67tEz3/KLptAq0yfDhXiKGN4GLtqrOiUuis3y2mjItEcPk71
+#    - name: Restart ssh service
+#      command: systemctl restart ssh
+
+    - name: Setup Networking
+      become: yes
+      shell: | 
+        cd /ete/netplan
+        sudo cp 00-installer-config.yaml 00-installer-config.yaml.orig
+        sudo echo > 00-installer-config.yaml
+
     - name: Edit NETPLAN 
-        
+      copy:
+        src: files/netplan-urabbitmq01
+        dest: /etc/netplan/00-installer-config.yaml
+  
+    - name: Enable new netplan
+      shell: netplan apply
