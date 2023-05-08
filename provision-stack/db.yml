@@ -134,8 +134,6 @@
   handlers:
     - name: Restart mysql
       service:
-        name: mysql
-        state: restarted
         name: mariadb
         state: restarted
 
