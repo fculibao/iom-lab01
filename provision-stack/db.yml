@@ -3,7 +3,6 @@
   hosts: dbsrvgrp
   gather_facts: no
   tasks:
-<<<<<<< HEAD
     - name: Installing Mysql Service and dependencies
       package:
         name: "{{item}}"
@@ -23,7 +22,6 @@
     - name: Start and enable mysql service
       service:
         name: mysql
-=======
     - name: Setup Local hostname
       ansible.builtin.hostname:
         name: "{{hostname}}"
@@ -68,7 +66,6 @@
     - name: Start and enable mysql service
       service:
         name: mariadb
->>>>>>> test
         state: started
         enabled: yes
       tags:
@@ -82,16 +79,12 @@
         host: '%'
         state: present
 
-<<<<<<< HEAD
 
-=======
->>>>>>> test
     - name: Creating accounts DB
       mysql_db:
         name: "{{dbname}}"
         state: present
 
-<<<<<<< HEAD
     - name: Enable remote login to mysql svc
       lineinfile:
         path: /etc/mysql/mysql.conf.d/mysqld.cnf
@@ -102,7 +95,6 @@
         - Restart mysql
       tags:
         - conf
-=======
     - name: Edit my.cnf to allow root at localhost
       shell: |
         sudo echo "skip-grant-table" >> /etc/my.cnf.d/server.cnf
@@ -138,16 +130,12 @@
       with_items:
         - ssh
         - mysql
->>>>>>> test
 
   handlers:
     - name: Restart mysql
       service:
-<<<<<<< HEAD
         name: mysql
         state: restarted
-=======
         name: mariadb
         state: restarted
 
->>>>>>> test
