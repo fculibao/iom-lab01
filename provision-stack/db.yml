@@ -4,20 +4,36 @@
   gather_facts: no
   tasks:
     - name: Setup Local hostname
-      shell: |
-        hostname {{hostname}}
-        echo {{hostname}} > /etc/hostname
- 
+      ansible.builtin.hostname:
+        name: "{{hostname}}"
+
     - name: Setup DB Password
       shell: |
         echo "DATABASE_PASS='admin123'" >> ~/.bash_profile
         source ~/.bash_profile
 
-    - name: Update the host
-      shell: |
-        sudo yum update -y
-        sudo yum install epel-release -y
+    - name: Update all Installed packages using YUM module
+      ansible.builtin.yum:  
+        name: "*"
+        state: latest
+        update_cache: yes
+        update_only: yes
+      register: yum_update_status  # move the output of this block into "yum_update_statue" variable
 
+    - name: Install epel repo
+      yum: name=epel-release state=present
+
+    - name: Install python bindings for SELinux
+      yum: name={{item}} state=present
+      with_items:
+      - libselinux-python
+      - libsemanage-python
+    
+    - name: Test to see is SELinux is running
+      command: getenforce
+      register: sestatus
+      changed_when: false
+   
     - name: Installing Mysql Service and dependencies
       ansible.builtin.yum:
         name: 
@@ -75,8 +91,19 @@
         sudo systemctl restart mariadb
         sleep 15;
 
+    - name: FirewallD rules
+      firewalld:
+        permanent: yes
+        immediate: yes
+        service: "{{ item }}"
+        state: enabled
+      with_items:
+        - ssh
+        - mysql
+
   handlers:
     - name: Restart mysql
       service:
         name: mariadb
         state: restarted
+
