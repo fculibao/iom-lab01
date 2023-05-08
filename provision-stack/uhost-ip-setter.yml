@@ -4,4 +4,9 @@
   gather_facts: no
   tasks:
     - name: Edit NETPLAN 
-        
+      copy:
+        src: files/netplan-urabbitmq01
+        dst: /etc/netplan/00-installer-config.yaml
+  
+    - name: Enable new netplan
+      shell: netplan apply
