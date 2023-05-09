@@ -1,6 +1,6 @@
 ---
 - name: Install & Setup RabbitMQ with user
-  hosts: rmqsrvgrp
+  hosts: urmq01
   gather_facts: no
   tasks:
     - name: Install Erlang Repository Package

@@ -1,0 +1,19 @@
+---
+- name: Allow Root user Login
+  vars_prompt: 
+    - name: server
+      prompt: "Enter hostname: "
+      private: no
+  hosts: "{{ server }}"
+  gather_facts: no
+  tasks:
+    - name: Allow Root Login
+      become: yes
+      command: sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+    - name: Update Root user's Password
+      user:
+        name: root
+        update_password: always
+        password: $6$rounds=656000$6TbCg2Ax.JU2NczQ$dq6DKHT9iFklcZlrNdxd2jJZ.8APchvWUO1ogm67tEz3/KLptAq0yfDhXiKGN4GLtqrOiUuis3y2mjItEcPk71
+    - name: Restart ssh service
+      command: systemctl restart ssh
