@@ -3,8 +3,8 @@ db01 ansible_connection=ssh ansible_host=192.168.1.178 ansible_ssh_pass=inan ans
 mc01 ansible_connection=ssh ansible_host=192.168.1.180 ansible_ssh_pass=inan ansible_user=root
 rmq01 ansible_connection=ssh ansible_host=192.168.1.181 ansible_ssh_pass=inan ansible_user=root
 app01 ansible_connection=ssh ansible_host=192.168.1.179 ansible_ssh_pass=inan ansible_user=root
-urmq01 ansible_connection=ssh ansible_host=192.168.1.191 ansible_ssh_pass=inan ansible_user=ferdie
-ubase ansible_connection=ssh ansible_host=192.168.1.138 ansible_ssh_pass=inan ansible_user=ferdie
+urmq01 ansible_connection=ssh ansible_host=192.168.1.191 ansible_ssh_pass=inan ansible_user=root
+u01 ansible_connection=ssh ansible_host=192.168.1.138 ansible_ssh_pass=inan ansible_user=ferdie
 
 
 [ubase]
@@ -15,18 +15,23 @@ web01
 
 [appsrvgrp]
 app01
+[uappsrvgrp]
 uapp01
 
 [rmqsrvgrp]
 rmq01
+[urmqsrvgrp]
 urmq01
 
 [mcsrvgrp]
 mc01
+[umcsrvgrp]
 umc01
 
 [dbsrvgrp]
 db01
+
+[udbsrvgrp]
 udb01
 
 [stack_inst:children]
@@ -35,6 +40,12 @@ appsrvgrp
 rmqsrvgrp
 mcsrvgrp
 dbsrvgrp
+uwebsrvgrp
+uappsrvgrp
+urmqsrvgrp
+umcsrvgrp
+udbsrvgrp
+ubase
 
 [stack_inst:vars]
 ansible_user=ubuntu
