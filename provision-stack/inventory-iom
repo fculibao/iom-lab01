@@ -4,6 +4,7 @@ mc01 ansible_connection=ssh ansible_host=192.168.1.180 ansible_ssh_pass=inan ans
 rmq01 ansible_connection=ssh ansible_host=192.168.1.181 ansible_ssh_pass=inan ansible_user=root
 app01 ansible_connection=ssh ansible_host=192.168.1.179 ansible_ssh_pass=inan ansible_user=root
 urmq01 ansible_connection=ssh ansible_host=192.168.1.191 ansible_ssh_pass=inan ansible_user=ferdie
+umc01 ansible_connection=ssh ansible_host=192.168.1.190 ansible_ssh_pass=inan ansible_user=ferdie
 u01 ansible_connection=ssh ansible_host=192.168.1.138 ansible_ssh_pass=inan ansible_user=ferdie
 
 
