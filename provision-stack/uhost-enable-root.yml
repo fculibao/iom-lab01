@@ -8,7 +8,6 @@
   gather_facts: no
   tasks:
     - name: Allow Root Login
-      become: yes
       command: sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
     - name: Update Root user's Password
       user:
