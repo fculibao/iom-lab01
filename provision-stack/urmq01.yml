@@ -1,13 +1,21 @@
 ---
-- name: Install & Setup RabbitMQ with user # ansible-playbook urabbitmq01.yml -kKb
+- name: Install & Setup RabbitMQ with user
   hosts: urmq01
   gather_facts: no
   tasks:
-    - name: Install Erlang Repository Package
+    - name: Update all packages to their latest version
       apt:
-        deb: https://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb
-      tags:
-        - package
+        name: "*"
+        state: latest
+    
+    - name: Install required dependencies
+      apt:
+        pkg:
+          - software-properties-common 
+          - curl 
+          - gnupg2 
+          - apt-transport-https 
+          - net-tools
 
     - name: Add an Erlang Solution public Key
       apt_key:
@@ -16,28 +24,33 @@
       tags:
         - package
 
+    - name: Add Erlang repository
+      command: echo "deb https://packages.erlang-solutions.com/ubuntu focal contrib" | tee /etc/apt/sources.list.d/erlang.list
+
+    - name: Update
+      apt:
+        name: "*"
+        state: latest
+
     - name: Install Erlang
       apt:
         name: erlang
-        update_cache: yes
+        #update_cache: yes
         cache_valid_time: 86400
         state: present
       tags:
-        - package
+        - package    
 
-    - name: Add an Apt signing key, uses whichever key is at the URL
-      apt_key:
-        url: https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc
-        state: present
-      tags:
-        - package
+    # By default RabbitMQ is not available in Ubuntu 20.04. So we need to install RabbitMq repository
+    # https://www.vultr.com/docs/install-rabbitmq-server-ubuntu-20-04-lts/
 
-    - name: apt repository
-      apt_repository:
-        repo: deb https://dl.bintray.com/rabbitmq/debian bionic main
-        state: present
-      tags:
-        - package
+    - name: Add RabbitMQ Official Repository
+      command: echo "deb https://dl.bintray.com/rabbitmq-erlang/debian focal erlang-22.x" | sudo tee /etc/apt/sources.list.d/rabbitmq.list
+
+    - name: Update the system one more time
+      apt:
+        name: "*"
+        state: latest
 
     - name: Install Rabbit MQ
       apt:

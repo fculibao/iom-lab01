@@ -2,7 +2,10 @@
 - name: Set host static IP address
   vars_prompt: 
     - name: server
-      prompt: "Enter hostname: "
+      prompt: "Enter host: "
+      private: no
+    - name: hostname
+      prompt: "enter hostname: "
       private: no
 
   hosts: "{{ server }}"
@@ -20,6 +23,10 @@
         path: /home/ferdie/.ssh/id_rsa.pub
         owner: ferdie
         group: ferdie
+
+    - name: Set hostname
+      ansible.builtin.hostname:
+        name: "{{ hostname }}"      
 
 #    - name: USER ROOT - Generate an OpenSSH keypair with the default values (4096 bits, rsa)
 #      openssh_keypair:
