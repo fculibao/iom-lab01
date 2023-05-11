@@ -1,0 +1,110 @@
+---
+- name: Install & Setup RabbitMQ with user
+  hosts: urmq01
+  gather_facts: no
+  tasks:
+    - name: Update all packages to their latest version
+      apt:
+        name: "*"
+        state: latest
+    
+    - name: Install required dependencies
+      apt:
+        pkg:
+          - software-properties-common 
+          - curl 
+          - gnupg2 
+          - apt-transport-https 
+          - net-tools
+
+    - name: Add an Erlang Solution public Key
+      apt_key:
+        url: https://packages.erlang-solutions.com/ubuntu/erlang_solutions.asc
+        state: present
+      tags:
+        - package
+
+    - name: Add Erlang repository
+      command: echo "deb https://packages.erlang-solutions.com/ubuntu focal contrib" | tee /etc/apt/sources.list.d/erlang.list
+
+    - name: Update
+      apt:
+        name: "*"
+        state: latest
+
+    - name: Install Erlang
+      apt:
+        name: erlang
+        #update_cache: yes
+        cache_valid_time: 86400
+        state: present
+      tags:
+        - package    
+
+    # By default RabbitMQ is not available in Ubuntu 20.04. So we need to install RabbitMq repository
+    # https://www.vultr.com/docs/install-rabbitmq-server-ubuntu-20-04-lts/
+
+    - name: Add RabbitMQ Official Repository
+      command: echo "deb https://dl.bintray.com/rabbitmq-erlang/debian focal erlang-22.x" | sudo tee /etc/apt/sources.list.d/rabbitmq.list
+
+    - name: Update the system one more time
+      apt:
+        name: "*"
+        state: latest
+
+    - name: Install Rabbit MQ
+      apt:
+        name: rabbitmq-server
+        state: present
+        update_cache: yes
+      tags:
+        - package
+
+
+    - name: Start & Enable RMQ
+      service:
+        name: rabbitmq-server
+        state: started
+        enabled: yes
+      tags:
+        - svc
+
+    - name: Config setup
+      copy:
+        content: |
+          [{rabbit, [{loopback_users, []}]}].
+        dest: /etc/rabbitmq/rabbitmq.config
+      notify:
+        - Restart RMQ
+      tags:
+        - conf
+
+
+    - rabbitmq_user:
+        user: test
+        password: test
+        configure_priv: .*
+        read_priv: .*
+        write_priv: .*
+        tags: administrator
+        state: present
+      notify:
+        - Restart RMQ
+      tags:
+        - conf
+
+
+    - name: Enables the rabbitmq_management plugin
+      rabbitmq_plugin:
+        names: rabbitmq_management
+        state: enabled
+      notify:
+        - Restart RMQ
+      tags:
+        - package
+
+  handlers:
+    - name: Restart RMQ
+      service:
+        name: rabbitmq-server
+        state: restarted
