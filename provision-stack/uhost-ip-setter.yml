@@ -7,6 +7,9 @@
     - name: hostname
       prompt: "enter hostname: "
       private: no
+    - name: netp
+      prompt: "Enter netp : "
+      private: no
 
   hosts: "{{ server }}"
   gather_facts: no
@@ -59,7 +62,7 @@
 
     - name: Edit NETPLAN 
       copy:
-        src: files/{{ netplan }}
+        src: files/netplan-{{ netp }}
         dest: /etc/netplan/00-installer-config.yaml
   
     - name: Enable new netplan

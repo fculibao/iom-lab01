@@ -1,0 +1,38 @@
+---
+- name: Install Memcache, Start & enable SVC
+  hosts: umcsrvgrp
+  gather_facts: no
+  tasks:
+    - name: Setup Local hostname
+      ansible.builtin.hostname:
+        name: "{{hostname}}"
+
+    - name: Install Memcache
+      apt:
+        name: memcached
+        state: present
+
+    - name: Start & Enable Memcache
+      service:
+        name: memcached
+        state: started
+        enabled: yes
+      tags:
+        - svc
+
+#    - name: Enable remote login to memecache
+#      lineinfile:
+#        path: /etc/memcached.conf
+#        regexp: '^-l '
+#        line: '-l 0.0.0.0'
+#        backup: yes
+#      notify:
+#        - Restart memcached
+#      tags:
+#        - conf
+#
+  handlers:
+    - name: Restart memcached
+      service:
+        name: memcached
+        state: restarted
