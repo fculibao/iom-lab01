@@ -1,6 +1,6 @@
 ---
 - name: Install & Setup RabbitMQ with user # ansible-playbook urabbitmq01.yml -kKb
-  hosts: urmq01
+  hosts: rmq01
   gather_facts: no
   tasks:
     - name: Install Erlang Repository Package

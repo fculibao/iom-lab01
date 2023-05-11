@@ -1,6 +1,6 @@
 ---
 - name: Install & Setup RabbitMQ with user
-  hosts: urmq01
+  hosts: rmq01
   gather_facts: no
   tasks:
     - name: Update all packages to their latest version

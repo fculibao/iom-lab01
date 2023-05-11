@@ -1,6 +1,6 @@
 ---
 - name: Install Memcache, Start & enable SVC
-  hosts: umcsrvgrp
+  hosts: mcsrvgrp
   gather_facts: no
   tasks:
     - name: Setup Local hostname
