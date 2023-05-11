@@ -86,16 +86,16 @@
         name: "{{dbname}}"
         state: present
 
-    - name: Enable remote login to mysql svc
-      lineinfile:
-        path: /etc/mysql/mysql.conf.d/mysqld.cnf
-        regexp: '^bind-address'
-        line: 'bind-address = 0.0.0.0'
-        backup: yes
-      notify:
-        - Restart mysql
-      tags:
-        - conf
+#    - name: Enable remote login to mysql svc
+#      lineinfile:
+#        path: /etc/mysql/mysql.conf.d/mysqld.cnf
+#        regexp: '^bind-address'
+#        line: 'bind-address = 0.0.0.0'
+#        backup: yes
+#      notify:
+#        - Restart mysql
+#      tags:
+#        - conf
     - name: Edit my.cnf to allow root at localhost
       shell: |
         sudo echo "skip-grant-table" >> /etc/my.cnf.d/server.cnf
